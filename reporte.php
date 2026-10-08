@@ -27,7 +27,10 @@ $flota = [
 
 usort($flota, function ($a, $b) {
     return $b["autonomia"] <=> $a["autonomia"];
-})
+});
+
+//Iniciar el almacenamiento temporal del HTML
+ob_start();
 ?>
 
 <h2>Catálogo de vehículos EcoDrive</h2>
@@ -44,9 +47,9 @@ usort($flota, function ($a, $b) {
 
 <?php foreach ($flota as $vehiculo): ?>
     <tr>
-        <td><?= mb_strtoupper($vehiculo["modelo"], "UTF-8") ?></td> <!--Convierte el modelo a MAYÚSCULAS, respetando las tildes-->
+        <td><?= htmlspecialchars(mb_strtoupper($vehiculo["modelo"], "UTF-8"), ENT_QUOTES, "UTF-8") ?></td> <!--Convierte el modelo a MAYÚSCULAS, respetando las tildes-->
 
-        <td><?= mb_convert_case($vehiculo["categoria"], MB_CASE_TITLE, "UTF-8") ?></td> <!--Pone la primera letra en mayúscula de cada palabra-->
+        <td><?= htmlspecialchars(mb_convert_case($vehiculo["categoria"], MB_CASE_TITLE, "UTF-8"), ENT_QUOTES, "UTF-8") ?></td> <!--Pone la primera letra en mayúscula de cada palabra-->
 
         <td><?= $vehiculo["autonomia"] ?> km</td>
 
@@ -69,3 +72,23 @@ usort($flota, function ($a, $b) {
 <?php endforeach; ?>
 
 </table>
+
+<?php
+//Recupera el HTML almacenado y mostrarlo
+$reporte = ob_get_clean();
+
+echo $reporte;
+?>
+
+<script>
+    //Recibe los vehículos de PHP en JavaScript
+    const vehiculos = <?= json_encode(
+        $flota,
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    ) ?>;
+
+    //Muestra los vehículos en la consola
+    console.log(vehiculos);
+</script>
+
+<!--http://localhost:8000/reporte.php-->
